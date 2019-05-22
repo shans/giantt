@@ -2,3 +2,5 @@ src/*.js
 *.html
 *.csv
 node_modules
+*.key
+package-lock.json

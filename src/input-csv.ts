@@ -1,6 +1,6 @@
 import {readFileSync} from 'fs';
 
-export function getData(filename: string) {
+export function getCSVData(filename: string) {
   const lines = readFileSync(filename).toString();
   const records = [];
   for (const line of lines.split('\n')) {

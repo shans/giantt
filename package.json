@@ -1,0 +1,25 @@
+{
+  "name": "giantt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "@types/node": "^12.0.2",
+    "googleapis": "^40.0.0",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shans/giantt.git"
+  },
+  "author": "shane.stephen@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shans/giantt/issues"
+  },
+  "homepage": "https://github.com/shans/giantt#readme"
+}

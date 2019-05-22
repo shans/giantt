@@ -24,8 +24,11 @@ export class InputTask implements Task {
   constructor(public id: string, public name: string, public owner: string, start: string, end: string, duration: string, dependencies: string, percent: string) {
     this.start = start === '' ? null : new Date(start);
     this.end = end === '' ? null : new Date(end);
-    if ((this.start && this.start.toString() === 'Invalid Date') || (this.end && this.end.toString() === 'Invalid Date')) {
-      throw new TypeError('Invalid Date provided to InputTask constructor');
+    if (this.start && this.start.toString() === 'Invalid Date') {
+       throw new TypeError(`Invalid Date ${start} provided to InputTask constructor`);
+    }
+    if (this.end && this.end.toString() === 'Invalid Date') {
+      throw new TypeError(`Invalid Date ${end} provided to InputTask constructor`);
     }
     const l = duration.length - 1;
     const unit = duration[l];
@@ -35,8 +38,8 @@ export class InputTask implements Task {
     else {
       this.duration = {amount: Number(duration.substring(0, l)), unit};
     }
-    this.dependencies = dependencies.split(',').map(a => a.trim()).filter(a => a !== '');
-    this.percent = Number(percent.substring(0, percent.length - 1));
+    this.dependencies = dependencies ? dependencies.split(',').map(a => a.trim()).filter(a => a !== '') : [];
+    this.percent = percent ? Number(percent.substring(0, percent.length - 1)) : 0;
   }
   makeSchedulable(): SchedulableTask {
     return new SchedulableTask(this.id, this.name, this.owner, this.start, 

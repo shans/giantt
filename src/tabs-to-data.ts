@@ -11,7 +11,7 @@ export function tabsToData(tabs: string[][]) {
   } catch (e) {
     tabs = tabs.slice(1);
   }
-  const result = tabs.filter(a => a[0] !== '').map(tabToData);
+  const result = tabs.filter(a => a.length !== 0).filter(a => a[0] !== '').map(tabToData);
   const minDate = Math.min(...result.filter(a => a.start !== null).map(a => a.start !== null ? a.start.getTime() : 0));
   result.forEach(a => {
     if (a.start == null && a.dependencies.length == 0) {
