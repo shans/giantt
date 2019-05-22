@@ -4,7 +4,7 @@
 
 * clone source code locally
 * `npm install`
-* `npm install -g tsc`
+* `npm install -g typescript`
 * `tsc`
 
 ## Usage
