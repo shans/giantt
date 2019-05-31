@@ -1,5 +1,4 @@
 src/*.js
-*.html
 *.csv
 node_modules
 *.key
