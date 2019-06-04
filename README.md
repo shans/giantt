@@ -7,8 +7,8 @@
 * `npm install -g typescript`
 * `tsc`
 * webpack stuff:
-  * `npm install typescript ts-loader webpack`
-  * `./node_modules/webpack/bin/webpack.js`
+  * `npm install typescript ts-loader webpack webpack-cli`
+  * `tsc && ./node_modules/webpack/bin/webpack.js`
 
 ## Usage
 

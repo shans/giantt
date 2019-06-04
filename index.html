@@ -13,12 +13,11 @@
         const data = sheet.result.values;
         const html = giantt.renderHTML(data);
         document.getElementById('authbox').style.display = 'none';
-        document.getElementById('contents').innerHTML = html;
+        document.write(html);
       }
     </script>
   </head>
   <body>
-    <div id='contents'></div>
     <div id='authbox'>
       <p>Arcs Gantt Chart</p>
 
