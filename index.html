@@ -6,9 +6,20 @@
     <script src="./dist/bundle.js"></script>
     <script type="text/javascript">
       async function doTheThing() {
+        const DEFAULT_SHEET_ID = '1L1g-Bk7Vx_QJmOZehRHetbWT4uziaIRa3L2U-VrrGU0';
+        const DEFAULT_TAB_ID = 'giantt';
+
+        // Pull the sheet and tab ID out of the URL's hash fragment (or just
+        // use defaults). Values can be supplied like so:
+        // http://path.to.page#sheetId=asdf&tabId=ghjk
+        const hash = location.hash ? location.hash.substr(1) : '';
+        const params = new URLSearchParams(hash);
+        const sheetId = params.get('sheetId') || DEFAULT_SHEET_ID;
+        const tabId = params.get('tabId') || DEFAULT_TAB_ID;
+
         const sheet = await gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: '1L1g-Bk7Vx_QJmOZehRHetbWT4uziaIRa3L2U-VrrGU0',
-          range: 'giantt',
+          spreadsheetId: sheetId,
+          range: tabId,
         });
         const data = sheet.result.values;
         const html = giantt.renderHTML(data);
