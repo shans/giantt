@@ -53,6 +53,7 @@ export class SchedulableTask implements Task {
   allReverseDependencies: string[] = [];
   rank: number = -1;
   weakDependencies: string[] = [];
+  intervals: [Date, Date][] = [];
   constructor(public id: string, public name: string, public owner: string, public start: Date | null, 
     public end: Date | null, public duration: DurationInfo | null, public dependencies: string[], public percent: number) {
   }
