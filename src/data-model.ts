@@ -81,6 +81,23 @@ export class SchedulableTask implements Task {
     }
   }
 
+  static modifier = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+  durationAsMilliseconds() {
+    if (this.duration) {
+      let weeksLeft = this.duration.amount;
+      if (this.duration.unit == 'd') {
+          weeksLeft /= 5;
+      }
+      if (this.duration.unit == 'm') {
+          weeksLeft *= 4;
+      }
+      return weeksLeft * SchedulableTask.modifier;
+    } else {
+      throw new Error(`Can't compute duration with no duration field`);
+    }
+  }
+
   static completeDependencyInformation(tasks: SchedulableTask[]) {
     const taskMap: {[index: string]: SchedulableTask} = {};
 

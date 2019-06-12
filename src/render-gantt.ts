@@ -221,7 +221,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     output += `<div class=label style='color: ${colors[task.owner]};'>${task.name}</div>`
     output += `
     <div class=background>
-    <div class=task id='${task.id}' style='width: ${width}px; top: ${top}px; left: ${left}px; background: ${colors[task.owner]}'>
+    <div class=task id='${task.id}' style='width: ${width}px; top: ${top}px; left: ${left}px; background: ${colors[task.owner] || 'black'}'>
     <div class='intervals'>`
     let prev = null;
     let base = task.start.getTime();

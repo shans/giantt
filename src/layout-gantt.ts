@@ -64,14 +64,7 @@ class TimeMap {
     if (task.duration == null) {
       throw new Error(`Can't schedule floating timeslot for task ${task.id} with missing duration`);
     }
-    const modifier = 1000 * 60 * 60 * 24 * 7; // 1 week
-    let weeksLeft = task.duration.amount;
-    if (task.duration.unit == 'd') {
-      weeksLeft /= 5;
-    }
-    if (task.duration.unit == 'm') {
-      weeksLeft *= 4;
-    }
+    let durationLeft = task.durationAsMilliseconds();
     let adjustedStart = null;
     let effectiveEnd = null;
     for (let i = 0; i < this.intervals.length; i++) {
@@ -80,7 +73,7 @@ class TimeMap {
         if (i > 0 && this.intervals[i - 1].end > effectiveStart) {
           effectiveStart = this.intervals[i - 1].end;
         }
-        effectiveEnd = new Date(effectiveStart.getTime() + weeksLeft * modifier);
+        effectiveEnd = new Date(effectiveStart.getTime() + durationLeft);
         if (this.intervals[i].start < effectiveEnd) {
           effectiveEnd = this.intervals[i].start;
         }
@@ -90,16 +83,16 @@ class TimeMap {
         if (adjustedStart == null) {
           adjustedStart = effectiveStart;
         }
-        weeksLeft -= (effectiveEnd.getTime() - effectiveStart.getTime()) / modifier;
+        durationLeft -= (effectiveEnd.getTime() - effectiveStart.getTime());
         this.intervals.splice(i, 0, {start: effectiveStart, end: effectiveEnd, task});
         task.intervals.push([effectiveStart, effectiveEnd]);
         i += 1;
-        if (weeksLeft == 0) {
+        if (durationLeft == 0) {
           break;
         }
       }
     }
-    if (weeksLeft > 0) {
+    if (durationLeft > 0) {
       let effectiveStart = adjustedStart || task.start;
       if (this.intervals.length > 0) {
         if (this.intervals[this.intervals.length - 1].end > effectiveStart) {
@@ -109,7 +102,7 @@ class TimeMap {
       if (adjustedStart == null) {
         adjustedStart = effectiveStart;
       }
-      effectiveEnd = new Date(effectiveStart.getTime() + weeksLeft * modifier);        
+      effectiveEnd = new Date(effectiveStart.getTime() + durationLeft);        
       this.intervals.push({start: effectiveStart, end: effectiveEnd, task});
       task.intervals.push([effectiveStart, effectiveEnd]);
     }
@@ -123,13 +116,28 @@ type Dictionary<T> = {[index: string]: T}
 
 class UserTimeMap {
   timeMaps: Dictionary<TimeMap> = {};
-  scheduleFixed(task: SchedulableTask) {
-    if (!this.timeMaps[task.owner]) {
-      this.timeMaps[task.owner] = new TimeMap();
+  scheduleFixed(task: SchedulableTask): ScheduleResult {
+    const owners = task.owner.split(',').map(a => a.trim());
+    for (const owner of owners) {
+      if (!this.timeMaps[owner]) {
+        this.timeMaps[owner] = new TimeMap();
+      }
+      let result = this.timeMaps[owner].scheduleFixed(task);
+      if (result.result == false) {
+        return result;
+      }
     }
-    return this.timeMaps[task.owner].scheduleFixed(task);
+    return {result: true, context: null};
   }
   scheduleFloating(task: SchedulableTask) {
+    if (task.owner === '') {
+      if (task.start == null) {
+        task.start = new Date();
+      }
+      task.end = new Date(task.start.getTime() + task.durationAsMilliseconds());
+      task.intervals.push([task.start, task.end]);
+      return {result: true, context: null};
+    }
     if (!this.timeMaps[task.owner]) {
       this.timeMaps[task.owner] = new TimeMap();
     }
@@ -166,8 +174,14 @@ export function improvedLayout(tasks: InputTask[]): SchedulableTask[] {
   }
 
   while (remainingTasks.length > 0) {
-    const {trueFor: noDeps, falseFor: deps}
-      = partition(remainingTasks, task => task.dependencies.filter(dep => dependents[dep] == undefined).length === 0);
+    const seenUsers = new Set<string>();
+    const {trueFor: noDeps, falseFor: deps} = partition(remainingTasks, task => {
+      if (seenUsers.has(task.owner)) {
+        return false;
+      }
+      seenUsers.add(task.owner);
+      return task.dependencies.filter(dep => dependents[dep] == undefined).length === 0;
+    });
     remainingTasks = deps;
     if (noDeps.length == 0) {
       throw new Error(`circular dependency in tasks ${deps.map(task => task.id)}`);
