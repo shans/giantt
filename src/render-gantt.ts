@@ -55,6 +55,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     background-color: #EEE;
     border-bottom: 1px solid #DDD;
     border-top: 1px solid #DDD;
+    height: ${TASK_HEIGHT + TASK_PADDING - 1}px;
   }
   .label {
     grid-column: 1;
@@ -68,7 +69,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     position: relative;
     border-radius: 5px;
     grid-column: 3;
-    z-index: 2;
+    z-index: 3;
     box-sizing: border-box;
     color: black;
   }
@@ -83,10 +84,30 @@ export function renderGantt(tasks: SchedulableTask[]) {
     height: ${TASK_HEIGHT}px;
     padding-left: 5px;
     position: relative;
-    top: -${TASK_HEIGHT - 1}px;
+    top: -${2 * TASK_HEIGHT - 1}px;
     font-size: 14px;
     font-family: 'Roboto', sans-serif;
     line-height: ${TASK_HEIGHT - 2}px;
+  }
+
+  .intervals {
+    width: 200%;
+    height: 100%;
+  }
+
+  .interval-top {
+    height: ${TASK_HEIGHT / 2 - 1}px;
+    background-color: white;
+    position: relative;
+    display: inline-block;
+  }
+
+  .interval-bottom {
+    height: ${TASK_HEIGHT / 2 - 1}px;
+    top: ${TASK_HEIGHT / 2 + 1}px;
+    background-color: white;
+    position: relative;
+    display: inline-block;
   }
 
   .task-complete {
@@ -94,6 +115,8 @@ export function renderGantt(tasks: SchedulableTask[]) {
     height: 100%;
     border-radius: 5px;
     box-sizing: border-box;
+    position: relative;
+    top: -${TASK_HEIGHT}px;
   }
 
   .background {
@@ -114,6 +137,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     border-bottom-left-radius: 30px;
     background: transparent;
     box-sizing: border-box;
+    z-index: 2;
   }
   .up-arrow {
     position: relative;
@@ -123,6 +147,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     border-top-left-radius: 30px;
     background: transparent;
     box-sizing: border-box;
+    z-index: 2;
   }
 
   .down-arrow.selected, .up-arrow.selected {
@@ -151,7 +176,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     box-sizing: border-box;
     position: relative;
     top: -${(TASK_HEIGHT + TASK_PADDING) * (tasks.length + 1) + 2 * TASK_PADDING}px;
-    z-index: 3;    
+    z-index: 4;    
   }
   </style>
   <div class='box'>
@@ -160,7 +185,13 @@ export function renderGantt(tasks: SchedulableTask[]) {
   const task_positions : {[index: string]: TaskRenderData} = {};
   let top = TASK_PADDING / 2;
   let offset = 0;
+  let color = '#EEE';
   for (let task of tasks) {
+    if (color === '#EEE') {
+      color = 'white';
+    } else {
+      color = '#EEE';
+    }
     if (task.start == null || task.end == null) {
       offset += TASK_HEIGHT + TASK_PADDING;;
       continue;
@@ -190,8 +221,35 @@ export function renderGantt(tasks: SchedulableTask[]) {
     output += `<div class=label style='color: ${colors[task.owner]};'>${task.name}</div>`
     output += `
     <div class=background>
-    <div class=task id='${task.id}' style='width: ${width}px; top: ${top}px; left: ${left}px; background: ${colors[task.owner]}'>
-    <div class='task-complete' style='width: ${task.percent}%'></div><div class='message'></div>
+    <div class=task id='${task.id}' style='width: ${width}px; top: ${top}px; left: ${left}px; background: ${colors[task.owner] || 'black'}'>
+    <div class='intervals'>`
+    let prev = null;
+    let base = task.start.getTime();
+    for (const interval of task.intervals) {
+      if (prev !== null) {
+        const intervalWidth = (interval[0].getTime() - prev) / one_week * WEEK_WIDTH;
+        const intervalLeft = (prev - base) / one_week * WEEK_WIDTH;
+        output += `<div class='interval-top' style='width: ${intervalWidth}px; left: ${intervalLeft}px; background-color: ${color}'></div>`;
+        output += `<div class='interval-bottom' style='width: ${intervalWidth}px; left: ${intervalLeft - intervalWidth}px; background-color: ${color}'></div>`;
+      }
+      prev = interval[1].getTime();
+      base = interval[0].getTime();
+    }
+    const totalLength = task.intervals.map(([a, b]) => b.getTime() - a.getTime()).reduce((a, b) => a + b);
+    let complete = totalLength * task.percent / 100;
+    let completeAsPercent;
+    for (const interval of task.intervals) {
+      if (complete > interval[1].getTime() - interval[0].getTime()) {
+        complete -= interval[1].getTime() - interval[0].getTime();
+      } else {
+        const position = interval[0].getTime() + complete - task.start.getTime();
+        completeAsPercent = position / (task.end.getTime() - task.start.getTime()) * 100;
+        break;
+      }
+    }
+    output += `
+    </div>
+    <div class='task-complete' style='width: ${completeAsPercent}%'></div><div class='message'></div>
     </div>
     </div>`;
     offset += TASK_HEIGHT + TASK_PADDING;
@@ -263,7 +321,7 @@ export function renderGantt(tasks: SchedulableTask[]) {
     descendants: [${task.allReverseDependencies.map(a => `'${a}'`).join(', ')}],
     ancestors: [${task.allDependencies.map(a => `'${a}'`).join(', ')}],
     duration: '${task.duration ? task.duration.amount + task.duration.unit : '0w'}',
-    arrows: [${[...arrows_for_task[task.id]].map(a => `'${a}'`).join(', ')}]
+    arrows: [${[...(arrows_for_task[task.id] || new Set())].map(a => `'${a}'`).join(', ')}]
   }`);
 
   output += `<script>

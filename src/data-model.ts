@@ -53,6 +53,7 @@ export class SchedulableTask implements Task {
   allReverseDependencies: string[] = [];
   rank: number = -1;
   weakDependencies: string[] = [];
+  intervals: [Date, Date][] = [];
   constructor(public id: string, public name: string, public owner: string, public start: Date | null, 
     public end: Date | null, public duration: DurationInfo | null, public dependencies: string[], public percent: number) {
   }
@@ -77,6 +78,23 @@ export class SchedulableTask implements Task {
         modifier *= 30;
       }
       this.end = new Date(this.start.getTime() + this.duration.amount * modifier);
+    }
+  }
+
+  static modifier = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+  durationAsMilliseconds() {
+    if (this.duration) {
+      let weeksLeft = this.duration.amount;
+      if (this.duration.unit == 'd') {
+          weeksLeft /= 5;
+      }
+      if (this.duration.unit == 'm') {
+          weeksLeft *= 4;
+      }
+      return weeksLeft * SchedulableTask.modifier;
+    } else {
+      throw new Error(`Can't compute duration with no duration field`);
     }
   }
 

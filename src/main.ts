@@ -1,7 +1,7 @@
 import {getCSVData} from "./input-csv";
 import {getSheetData} from "./input-sheet";
 import {tabsToData} from "./tabs-to-data";
-import {layoutGantt} from "./layout-gantt";
+import {improvedLayout} from "./layout-gantt";
 import {renderGantt} from "./render-gantt";
 import {goodSort} from "./sort-tasks";
 import {writeHTML} from "./output-file";
@@ -29,7 +29,7 @@ async function main() {
     tabs = tabsToData(data);
   }
 
-  const fullTabs = layoutGantt(tabs);
+  const fullTabs = improvedLayout(tabs);
 
   const depFilteredTabs = goodSort(fullTabs);
 
