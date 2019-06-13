@@ -1,8 +1,8 @@
 import {getCSVData} from "./input-csv";
 import {tabsToData} from "./tabs-to-data";
-import {layoutGantt} from "./layout-gantt";
+import {improvedLayout} from "./layout-gantt";
 import {renderGantt} from "./render-gantt";
-import {ownerThenStart, dependencyFilter, goodSort} from "./sort-tasks";
+import {goodSort} from "./sort-tasks";
 import {writeHTML} from "./output-file";
 import {getSheetData} from "./input-sheet";
 const minimist = require('minimist');
@@ -31,17 +31,20 @@ async function main() {
     tabs = tabsToData(data);
   }
 
-let fullTabs = layoutGantt(tabs);
+  let fullTabs = improvedLayout(tabs);
 
-  const taskOwners: {[index: string]: string} = {}
-  fullTabs.forEach(task => taskOwners[task.id] = task.owner);
+  const taskOwners: {[index: string]: string[]} = {}
+  fullTabs.forEach(task => {
+    const ownerList = task.owner.split(',').map(a => a.trim());
+    taskOwners[task.id] = ownerList;
+  });
 
   fullTabs = fullTabs.filter(task => {
-    if (task.owner == options.owner) {
+    if (task.owner.split(',').map(a => a.trim()).includes(options.owner)) {
       return true;
     }
     if (options.dependencies) {
-      let ownedDeps = task.allDependencies.filter(dep => taskOwners[dep] == options.owner);
+      let ownedDeps = task.allDependencies.filter(dep => taskOwners[dep].includes(options.owner));
       return ownedDeps.length > 0;
     }
   });
