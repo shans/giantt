@@ -22,7 +22,7 @@ export class InputTask implements Task {
   dependencies: string[];
   percent: number;
   defaultStart: Date | null = null;
-  priority: number = Number.MAX_SAFE_INTEGER;
+  priority: number = -1;
   constructor(public id: string, public name: string, public owner: string, start: string, end: string, duration: string, dependencies: string, percent: string, priority: string) {
     this.start = start === '' ? null : new Date(start);
     this.end = end === '' ? null : new Date(end);
@@ -43,8 +43,10 @@ export class InputTask implements Task {
     this.dependencies = dependencies ? dependencies.split(',').map(a => a.trim()).filter(a => a !== '') : [];
     this.percent = percent ? Number(percent.substring(0, percent.length - 1)) : 0;
     const priorityAsNumber: number = Number(priority);
-    if (Number.isSafeInteger(priorityAsNumber)) {
+    if (Number.isSafeInteger(priorityAsNumber) && priorityAsNumber > 0) {
       this.priority = priorityAsNumber;
+    } else if (priority !== '') {
+      throw new Error(`please specify integer priority for task ${this.id}`);
     }
   }
   makeSchedulable(): SchedulableTask {

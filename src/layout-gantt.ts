@@ -1,4 +1,5 @@
 import {SchedulableTask, InputTask} from "./data-model";
+import {chain, ownerSort, prioritySort} from "./sort-tasks";
 
 type PartitionResult<A> = {trueFor: A[], falseFor: A[]}
 
@@ -150,6 +151,20 @@ export function improvedLayout(tasks: InputTask[]): SchedulableTask[] {
 
   // Make tasks schedulable;
   const schedulableTasks = tasks.map(task => task.makeSchedulable());
+
+  const delta = 1 / schedulableTasks.length;
+  let currentPriority = 0;
+  for (const task of schedulableTasks) {
+    if (task.priority == -1) {
+      currentPriority += delta;
+      task.priority = currentPriority; 
+    } else {
+      currentPriority = task.priority;
+    }
+  }
+
+  schedulableTasks.sort(chain([ownerSort, prioritySort]));
+
   SchedulableTask.completeDependencyInformation(schedulableTasks);
 
   // Schedule tasks with a defined start and end point

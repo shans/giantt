@@ -178,3 +178,13 @@ export function startSort(a: SchedulableTask, b: SchedulableTask) {
   }
   return 0;
 }
+
+export function prioritySort(a: SchedulableTask, b: SchedulableTask) {
+  if (a.priority < b.priority) {
+    return -1;
+  }
+  if (a.priority > b.priority) {
+    return 1;
+  }
+  return 0;
+}
