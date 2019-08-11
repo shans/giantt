@@ -11,7 +11,8 @@ export interface Task {
   end: Date | null;
   duration: DurationInfo | null;
   dependencies: string[];
-  percent: number;  
+  percent: number;
+  priority: number;
 }
 
 export class InputTask implements Task {
@@ -21,7 +22,8 @@ export class InputTask implements Task {
   dependencies: string[];
   percent: number;
   defaultStart: Date | null = null;
-  constructor(public id: string, public name: string, public owner: string, start: string, end: string, duration: string, dependencies: string, percent: string) {
+  priority: number = -1;
+  constructor(public id: string, public name: string, public owner: string, start: string, end: string, duration: string, dependencies: string, percent: string, priority: string) {
     this.start = start === '' ? null : new Date(start);
     this.end = end === '' ? null : new Date(end);
     if (this.start && this.start.toString() === 'Invalid Date') {
@@ -40,10 +42,16 @@ export class InputTask implements Task {
     }
     this.dependencies = dependencies ? dependencies.split(',').map(a => a.trim()).filter(a => a !== '') : [];
     this.percent = percent ? Number(percent.substring(0, percent.length - 1)) : 0;
+    const priorityAsNumber: number = Number(priority);
+    if (Number.isSafeInteger(priorityAsNumber) && priorityAsNumber > 0) {
+      this.priority = priorityAsNumber;
+    } else if (priority !== '') {
+      throw new Error(`please specify integer priority for task ${this.id}`);
+    }
   }
   makeSchedulable(): SchedulableTask {
     return new SchedulableTask(this.id, this.name, this.owner, this.start, 
-          this.end, this.duration, this.dependencies, this.percent);
+          this.end, this.duration, this.dependencies, this.percent, this.priority);
   }
 }
 
@@ -55,7 +63,7 @@ export class SchedulableTask implements Task {
   weakDependencies: string[] = [];
   intervals: [Date, Date][] = [];
   constructor(public id: string, public name: string, public owner: string, public start: Date | null, 
-    public end: Date | null, public duration: DurationInfo | null, public dependencies: string[], public percent: number) {
+    public end: Date | null, public duration: DurationInfo | null, public dependencies: string[], public percent: number, public priority: number) {
   }
 
   computeEndDate(clearEnd: boolean = false) {

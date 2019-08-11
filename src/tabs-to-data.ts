@@ -1,7 +1,7 @@
 import {InputTask} from "./data-model";
 
 function tabToData(tab: string[]) {
-  return new InputTask(tab[0], tab[1], tab[2], tab[3], tab[4], tab[5], tab[6], tab[7]);
+  return new InputTask(tab[0], tab[1], tab[2], tab[3], tab[4], tab[5], tab[6], tab[7], tab[8] || '');
 }
 
 export function tabsToData(tabs: string[][]) {
