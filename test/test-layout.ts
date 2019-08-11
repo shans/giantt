@@ -20,9 +20,9 @@ function assertTaskSpans(task: SchedulableTask, start: Date | null, end: Date | 
 describe('improved layout', () => {
   it('schedules in description order', () => {
     let tasks = [
-      new InputTask('task1', 'The first task', 'owner1', 'Jan 1, 2019', '', '2w', '', '0%', ''),
-      new InputTask('task2', 'The second task', 'owner1', '', '', '3w', '', '0%', ''),
-      new InputTask('task3', 'The third task', 'owner1', '', '', '4w', '', '0%', '')
+      new InputTask('task1', 'The first task', 'owner1', 'Jan 1, 2019', '', '2w', '', '0%', '', ''),
+      new InputTask('task2', 'The second task', 'owner1', '', '', '3w', '', '0%', '', ''),
+      new InputTask('task3', 'The third task', 'owner1', '', '', '4w', '', '0%', '', '')
     ];
 
     const result = improvedLayout(tasks);
@@ -34,8 +34,8 @@ describe('improved layout', () => {
   
   it('schedules fixed tasks in the middle of floating tasks', () => {
     let tasks = [
-      new InputTask('floating', 'Floating task', 'owner1', 'Jan 1, 2019', '', '5w', '', '0%', ''),
-      new InputTask('fixed', 'Fixed task', 'owner1', 'Jan 15, 2019', 'Jan 29, 2019', '', '', '0%', '')
+      new InputTask('floating', 'Floating task', 'owner1', 'Jan 1, 2019', '', '5w', '', '0%', '', ''),
+      new InputTask('fixed', 'Fixed task', 'owner1', 'Jan 15, 2019', 'Jan 29, 2019', '', '', '0%', '', '')
     ];
 
     const result = improvedLayout(tasks);
@@ -45,9 +45,9 @@ describe('improved layout', () => {
 
   it('co-schedules fixed tasks with multiple owners', () => {
     let tasks = [
-      new InputTask('floating', 'Floating task', 'owner1', 'Jan 1, 2019', '', '5w', '', '0%', ''),
-      new InputTask('floating2', 'Floating task 2', 'owner2', 'Jan 8, 2019', '', '3w', '', '0%', ''),
-      new InputTask('fixed', 'Fixed task', 'owner1, owner2', 'Jan 15, 2019', 'Jan 29, 2019', '', '', '0%', '')
+      new InputTask('floating', 'Floating task', 'owner1', 'Jan 1, 2019', '', '5w', '', '0%', '', ''),
+      new InputTask('floating2', 'Floating task 2', 'owner2', 'Jan 8, 2019', '', '3w', '', '0%', '', ''),
+      new InputTask('fixed', 'Fixed task', 'owner1, owner2', 'Jan 15, 2019', 'Jan 29, 2019', '', '', '0%', '', '')
     ];
 
     const result = improvedLayout(tasks);
@@ -58,9 +58,9 @@ describe('improved layout', () => {
 
   it('respects priority dictates', () => {
     let tasks = [
-      new InputTask('task1', 'The first task', 'owner1', '', '', '2w', '', '0%', '3'),
-      new InputTask('task2', 'The second task', 'owner1', 'Jan 1, 2019', '', '3w', '', '0%', '1'),
-      new InputTask('task3', 'The third task', 'owner1', '', '', '4w', '', '0%', '2')
+      new InputTask('task1', 'The first task', 'owner1', '', '', '2w', '', '0%', '3', ''),
+      new InputTask('task2', 'The second task', 'owner1', 'Jan 1, 2019', '', '3w', '', '0%', '1', ''),
+      new InputTask('task3', 'The third task', 'owner1', '', '', '4w', '', '0%', '2', '')
     ];
 
     const result = improvedLayout(tasks);
@@ -72,12 +72,12 @@ describe('improved layout', () => {
 
   it('allocates priority based on last seen priority value', () => {
     let tasks = [
-      new InputTask('t1', 'The first task', 'owner1', '', '', '2w', '', '0%', '2'),
-      new InputTask('t2', 'The first task 2', 'owner1', '', '', '2w', '', '0%', ''),
-      new InputTask('t3', 'The second task', 'owner1', 'Jan 1, 2019', '', '3w', '', '0%', '1'),
-      new InputTask('t4', 'The second task 2', 'owner1', '', '', '2w', '', '0%', ''),
-      new InputTask('t5', 'The second task 3', 'owner1', '', '', '2w', '', '0%', ''),
-      new InputTask('t6', 'The third task', 'owner1', '', '', '4w', '', '0%', '3')
+      new InputTask('t1', 'The first task', 'owner1', '', '', '2w', '', '0%', '2', ''),
+      new InputTask('t2', 'The first task 2', 'owner1', '', '', '2w', '', '0%', '', ''),
+      new InputTask('t3', 'The second task', 'owner1', 'Jan 1, 2019', '', '3w', '', '0%', '1', ''),
+      new InputTask('t4', 'The second task 2', 'owner1', '', '', '2w', '', '0%', '', ''),
+      new InputTask('t5', 'The second task 3', 'owner1', '', '', '2w', '', '0%', '', ''),
+      new InputTask('t6', 'The third task', 'owner1', '', '', '4w', '', '0%', '3', '')
     ];
 
     const result = improvedLayout(tasks);

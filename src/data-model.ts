@@ -13,6 +13,7 @@ export interface Task {
   dependencies: string[];
   percent: number;
   priority: number;
+  rollup: string | null;
 }
 
 export class InputTask implements Task {
@@ -23,7 +24,8 @@ export class InputTask implements Task {
   percent: number;
   defaultStart: Date | null = null;
   priority: number = -1;
-  constructor(public id: string, public name: string, public owner: string, start: string, end: string, duration: string, dependencies: string, percent: string, priority: string) {
+  rollup: string | null = null;
+  constructor(public id: string, public name: string, public owner: string, start: string, end: string, duration: string, dependencies: string, percent: string, priority: string, rollup: string) {
     this.start = start === '' ? null : new Date(start);
     this.end = end === '' ? null : new Date(end);
     if (this.start && this.start.toString() === 'Invalid Date') {
@@ -48,10 +50,13 @@ export class InputTask implements Task {
     } else if (priority !== '') {
       throw new Error(`please specify integer priority for task ${this.id}`);
     }
+    if (rollup !== '') {
+      this.rollup = rollup;
+    }
   }
   makeSchedulable(): SchedulableTask {
     return new SchedulableTask(this.id, this.name, this.owner, this.start, 
-          this.end, this.duration, this.dependencies, this.percent, this.priority);
+          this.end, this.duration, this.dependencies, this.percent, this.priority, this.rollup);
   }
 }
 
@@ -63,7 +68,20 @@ export class SchedulableTask implements Task {
   weakDependencies: string[] = [];
   intervals: [Date, Date][] = [];
   constructor(public id: string, public name: string, public owner: string, public start: Date | null, 
-    public end: Date | null, public duration: DurationInfo | null, public dependencies: string[], public percent: number, public priority: number) {
+    public end: Date | null, public duration: DurationInfo | null, public dependencies: string[], public percent: number, public priority: number, public rollup: string | null) {
+  }
+
+  durationInWeeks() {
+    if (this.duration == null) {
+      return 0;
+    }
+    if (this.duration.unit === 'd') {
+      return this.duration.amount / 5;
+    }
+    if (this.duration.unit === 'm') {
+      return this.duration.amount * 30 / 7;
+    }
+    return this.duration.amount;
   }
 
   computeEndDate(clearEnd: boolean = false) {
