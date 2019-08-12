@@ -5,12 +5,15 @@ import {improvedLayout} from "./layout-gantt";
 import {renderGantt} from "./render-gantt";
 import {goodSort} from "./sort-tasks";
 import {writeHTML} from "./output-file";
+import {rollupGantt, archiveTasks} from "./rollup-gantt";
 const minimist = require('minimist');
 
 const options = minimist(process.argv.slice(2), {
   output: ['output'],
   inputFile: ['inputFile'],
-  inputAuth: ['inputAuth']
+  inputAuth: ['inputAuth'],
+  rollup: ['rollup'],
+  archive: ['archive']
 });
 
 if (!options.output || ((options.inputFile ? 0 : 1) + (options.inputAuth ? 0 : 1)) !== 1) {
@@ -29,7 +32,16 @@ async function main() {
     tabs = tabsToData(data);
   }
 
-  const fullTabs = improvedLayout(tabs);
+  let fullTabs = improvedLayout(tabs);
+
+  if (options.archive) {
+    const date = new Date(options.archive);
+    archiveTasks(fullTabs, date, options.rollup);
+  }
+
+  if (options.rollup || options.archive) {
+    fullTabs = rollupGantt(fullTabs);
+  }
 
   const depFilteredTabs = goodSort(fullTabs);
 
